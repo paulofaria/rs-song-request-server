@@ -39,7 +39,7 @@ impl error::ResponseError for SongRequestError {}
 
 #[get("/")]
 async fn index() -> Result<NamedFile> {
-    let path: PathBuf = "songList.json".parse().unwrap();
+    let path: PathBuf = "songs.json".parse().unwrap();
     Ok(NamedFile::open(path)?)
 }
 
