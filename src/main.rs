@@ -3,6 +3,7 @@ use actix_files::NamedFile;
 use actix_web::*;
 use derive_more::{Display, Error};
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::sync::Mutex;
 use std::path::PathBuf;
 
@@ -84,6 +85,11 @@ async fn delete_song_request(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "8080".to_string())
+        .parse()
+        .expect("PORT must be a number");
+
     let state = web::Data::new(AppState {
         requested_song_ids: Mutex::new(vec![]),
     });
@@ -99,7 +105,7 @@ async fn main() -> std::io::Result<()> {
             .service(add_song_request)
             .service(delete_song_request)
     })
-        .bind("127.0.0.1:8080")?
+        .bind(("0.0.0.0", port))?
         .run()
         .await
 }
