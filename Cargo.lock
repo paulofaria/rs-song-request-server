@@ -1376,7 +1376,6 @@ dependencies = [
  "actix-web-actors",
  "byteorder",
  "bytes 0.5.6",
- "derive_more",
  "env_logger",
  "futures",
  "log",
