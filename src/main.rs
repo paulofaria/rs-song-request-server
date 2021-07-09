@@ -41,7 +41,7 @@ struct ListSongRequestsResponse {
 
 #[get("/song-request")]
 async fn list_song_requests_service(
-    state: web::Data<Mutex<AppState>>
+    state: web::Data<Mutex<AppState>>,
 ) -> Result<web::Json<ListSongRequestsResponse>> {
     let state = state.lock().unwrap();
 
@@ -94,7 +94,8 @@ struct DeleteSongRequestRequest {
 #[delete("/song-request")]
 async fn delete_song_request_service(
     delete_song_request: web::Json<DeleteSongRequestRequest>,
-    state: web::Data<Mutex<AppState>>
+    state: web::Data<Mutex<AppState>>,
+    websocket_server_actor_address: web::Data<Addr<websocket_server_actor::WebsocketServerActor>>,
 ) -> Result<web::Json<ListSongRequestsResponse>, SongRequestError> {
     let mut state = state.lock().unwrap();
 
@@ -104,6 +105,12 @@ async fn delete_song_request_service(
 
     return if let Some(position) = position {
         state.requested_song_ids.remove(position);
+
+        websocket_server_actor_address.do_send(
+            websocket_server_actor::BroadcastAppStateMessage {
+                room_name: MAIN_ROOM.to_owned(),
+            }
+        );
 
         Ok(web::Json(ListSongRequestsResponse {
             requested_song_ids: state.requested_song_ids.clone()
