@@ -6,101 +6,118 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::Instant;
 
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 
-use crate::websocket_session_actor::{WebsocketSessionActor, MAIN_ROOM};
-use crate::{AppState, websocket_server_actor};
+use crate::websocket_session_actor::{WebsocketSessionActor};
+use crate::{AppState, websocket_server_actor, SongRequest};
 
-#[get("/")]
-pub async fn index_service() -> Result<NamedFile> {
-    let path: PathBuf = "songs.json".parse().unwrap();
+
+#[get("/{user_id}/songs")]
+pub async fn list_songs(
+    user_id: web::Path<String>,
+) -> Result<NamedFile> {
+    let filename = format!("{}.json", user_id.into_inner());
+    let path: PathBuf = filename.parse().unwrap();
     Ok(NamedFile::open(path)?)
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ListSongRequestsResponse {
-    requested_song_ids: Vec<String>,
+pub struct SongRequests {
+    song_requests: Vec<SongRequest>,
 }
 
-#[get("/song-request")]
+#[get("/{user_id}/songs/requests")]
 pub async fn list_song_requests_service(
+    user_id: web::Path<String>,
     state: web::Data<Mutex<AppState>>,
-) -> web::Json<ListSongRequestsResponse> {
+) -> web::Json<SongRequests> {
+    let user_id = user_id.into_inner();
     let state = state.lock().unwrap();
 
-    web::Json(ListSongRequestsResponse {
-        requested_song_ids: state.requested_song_ids.clone()
+    web::Json(SongRequests {
+        song_requests: state.song_requests_by_user_id
+            .get(&user_id)
+            .unwrap_or(&vec![])
+            .clone()
     })
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct CreateSongRequestRequest {
-    song_id: String,
-}
-
-#[post("/song-request")]
+#[put("/{user_id}/songs/requests")]
 pub async fn create_song_request_service(
-    create_song_request: web::Json<CreateSongRequestRequest>,
+    user_id: web::Path<String>,
+    song_request: web::Json<SongRequest>,
     app_state: web::Data<Mutex<AppState>>,
     websocket_server_actor_address: web::Data<Addr<websocket_server_actor::WebsocketServerActor>>,
-) -> web::Json<ListSongRequestsResponse> {
+) -> web::Json<SongRequests> {
+    let user_id = user_id.into_inner();
+    let song_request = song_request.into_inner();
     let mut state = app_state.lock().unwrap();
 
-    let position = state.requested_song_ids
+    let position = state.song_requests_by_user_id
+        .get(&user_id)
+        .unwrap_or(&vec![])
         .iter()
-        .position(|id| *id == create_song_request.song_id);
+        .position(|id| *id == song_request);
 
     if let None = position {
-        state.requested_song_ids.push(create_song_request.song_id.clone());
+        state.song_requests_by_user_id
+            .entry(user_id.to_owned())
+            .or_insert_with(|| vec![])
+            .push(song_request);
 
         websocket_server_actor_address.do_send(
             websocket_server_actor::BroadcastAppStateMessage {
-                room_name: MAIN_ROOM.to_owned(),
+                user_id: user_id.to_owned(),
             }
         );
     }
 
-    web::Json(ListSongRequestsResponse {
-        requested_song_ids: state.requested_song_ids.clone()
+    web::Json(SongRequests {
+        song_requests: state.song_requests_by_user_id
+            .get(&user_id)
+            .unwrap()
+            .clone()
     })
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DeleteSongRequestRequest {
-    song_id: String,
-}
-
-#[delete("/song-request")]
+#[delete("/{user_id}/songs/requests/{song_id}")]
 pub async fn delete_song_request_service(
-    delete_song_request: web::Json<DeleteSongRequestRequest>,
+    web::Path((user_id, song_id)): web::Path<(String, String)>,
     state: web::Data<Mutex<AppState>>,
     websocket_server_actor_address: web::Data<Addr<websocket_server_actor::WebsocketServerActor>>,
-) -> web::Json<ListSongRequestsResponse> {
+) -> web::Json<SongRequests> {
     let mut state = state.lock().unwrap();
 
-    let position = state.requested_song_ids
+    let position = state.song_requests_by_user_id
+        .get(&user_id)
+        .unwrap_or(&vec![])
         .iter()
-        .position(|id| *id == delete_song_request.song_id);
+        .position(|id| *id.song_id == song_id);
 
     if let Some(position) = position {
-        state.requested_song_ids.remove(position);
+        state.song_requests_by_user_id
+            .get_mut(&user_id)
+            .map(|vec| vec.remove(position));
 
         websocket_server_actor_address.do_send(
             websocket_server_actor::BroadcastAppStateMessage {
-                room_name: MAIN_ROOM.to_owned(),
+                user_id: user_id.to_owned(),
             }
         );
     }
 
-    web::Json(ListSongRequestsResponse {
-        requested_song_ids: state.requested_song_ids.clone()
+    web::Json(SongRequests {
+        song_requests: state.song_requests_by_user_id
+            .get(&user_id)
+            .unwrap()
+            .to_owned()
     })
 }
 
+#[get("/{user_id}/songs/requests/ws")]
 pub async fn websocket_service(
+    user_id: web::Path<String>,
     request: HttpRequest,
     stream: web::Payload,
     websocket_server_actor_address: web::Data<Addr<websocket_server_actor::WebsocketServerActor>>,
@@ -109,7 +126,7 @@ pub async fn websocket_service(
         WebsocketSessionActor {
             session_id: 0,
             last_heartbeat: Instant::now(),
-            room_name: MAIN_ROOM.to_owned(),
+            room_name: user_id.to_owned(),
             websocket_server_actor_address: websocket_server_actor_address.get_ref().clone(),
         },
         &request,

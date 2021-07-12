@@ -4,11 +4,11 @@ use rand::{self, rngs::ThreadRng, Rng};
 use std::sync::{Mutex};
 
 use std::collections::{HashMap, HashSet};
-use crate::{AppState};
+use crate::{AppState, SongRequest};
 use actix_web::web::Data;
 
 use serde::{Serialize};
-use crate::websocket_session_actor::{WebsocketReplyMessage, MAIN_ROOM};
+use crate::websocket_session_actor::{WebsocketReplyMessage};
 
 pub struct WebsocketServerActor {
     recipients_by_session_id: HashMap<usize, Recipient<WebsocketReplyMessage>>,
@@ -23,14 +23,9 @@ impl Actor for WebsocketServerActor {
 
 impl WebsocketServerActor {
     pub fn new(state: Data<Mutex<AppState>>) -> WebsocketServerActor {
-        let mut session_ids_by_room_name = HashMap::new();
-        let room_name = MAIN_ROOM.to_owned();
-        let session_ids = HashSet::new();
-        session_ids_by_room_name.insert(room_name, session_ids);
-
         WebsocketServerActor {
             recipients_by_session_id: HashMap::new(),
-            session_ids_by_room_name,
+            session_ids_by_room_name: HashMap::new(),
             random_number_generator: rand::thread_rng(),
             app_state: state,
         }
@@ -58,6 +53,7 @@ impl WebsocketServerActor {
 #[derive(Message)]
 #[rtype(usize)]
 pub struct ConnectMessage {
+    pub room_name: String,
     pub websocket_session_actor_recipient: Recipient<WebsocketReplyMessage>,
 }
 
@@ -73,9 +69,9 @@ impl Handler<ConnectMessage> for WebsocketServerActor {
         let session_id = self.random_number_generator.gen::<usize>();
         self.recipients_by_session_id.insert(session_id, connect_message.websocket_session_actor_recipient);
 
-        // Auto join main room.
+        // Auto join room.
         self.session_ids_by_room_name
-            .entry(MAIN_ROOM.to_owned())
+            .entry(connect_message.room_name.to_owned())
             .or_insert_with(HashSet::new)
             .insert(session_id);
 
@@ -198,14 +194,13 @@ impl Handler<JoinMessage> for WebsocketServerActor {
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct BroadcastAppStateMessage {
-    /// Room name.
-    pub room_name: String,
+    pub user_id: String,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AppStateResponse {
-    requested_song_ids: Vec<String>,
+    song_requests: Vec<SongRequest>,
 }
 
 impl Handler<BroadcastAppStateMessage> for WebsocketServerActor {
@@ -215,10 +210,13 @@ impl Handler<BroadcastAppStateMessage> for WebsocketServerActor {
         let app_state = self.app_state.lock().unwrap();
 
         let serialized_app_state_response = serde_json::to_string(&AppStateResponse {
-            requested_song_ids: app_state.requested_song_ids.clone()
+            song_requests: app_state.song_requests_by_user_id
+                .get(&broadcast_app_state_message.user_id)
+                .unwrap_or(&vec![])
+                .clone()
         }).unwrap();
 
         log::debug!("Broadcasted app state: {:?}", serialized_app_state_response);
-        self.send_message(&broadcast_app_state_message.room_name, serialized_app_state_response.as_str(), 0);
+        self.send_message(&broadcast_app_state_message.user_id, serialized_app_state_response.as_str(), 0);
     }
 }

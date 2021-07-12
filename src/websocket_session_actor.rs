@@ -4,8 +4,6 @@ use actix::*;
 use actix_web_actors::ws;
 use crate::websocket_server_actor;
 
-pub const MAIN_ROOM: &str = "main";
-
 pub struct WebsocketSessionActor {
     /// Unique client session id.
     pub session_id: usize,
@@ -27,6 +25,7 @@ impl Actor for WebsocketSessionActor {
 
         self.websocket_server_actor_address
             .send(websocket_server_actor::ConnectMessage {
+                room_name: self.room_name.to_owned(),
                 websocket_session_actor_recipient: websocket_session_actor_address.recipient(),
             })
             .into_actor(self)
