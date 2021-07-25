@@ -37,18 +37,19 @@ pub async fn update_playlist(
     let user_id = user_id.into_inner();
     let mut state = app_state.lock().unwrap();
 
-    let playlist= state.song_requests_by_user_id
-        .get_mut(&user_id);
+    state.song_requests_by_user_id
+        .entry(user_id.to_owned())
+        .or_insert_with(|| Playlist {
+            song_requests_enabled: false,
+            song_requests: vec![]
+        })
+        .song_requests_enabled = query.song_requests_enabled;
 
-    if let Some(playlist) = playlist {
-        playlist.song_requests_enabled = query.song_requests_enabled;
-
-        websocket_server_actor_address.do_send(
-            websocket_server_actor::BroadcastAppStateMessage {
-                user_id: user_id.to_owned(),
-            }
-        );
-    }
+    websocket_server_actor_address.do_send(
+        websocket_server_actor::BroadcastAppStateMessage {
+            user_id: user_id.to_owned(),
+        }
+    );
 
     web::Json(state.song_requests_by_user_id
         .get(&user_id)

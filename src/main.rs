@@ -4,7 +4,7 @@ use actix_cors::Cors;
 use std::sync::Mutex;
 use std::env;
 
-use crate::http_routes::{list_songs, delete_song_requests_service};
+use crate::http_routes::{list_songs, delete_song_requests_service, update_playlist};
 use crate::http_routes::list_song_requests_service;
 use crate::http_routes::create_song_request_service;
 use crate::http_routes::delete_song_request_service;
@@ -59,6 +59,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(app_state.clone())
             .data(websocket_server_actor_address.clone())
             .service(list_songs)
+            .service(update_playlist)
             .service(list_song_requests_service)
             .service(create_song_request_service)
             .service(delete_song_requests_service)
