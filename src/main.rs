@@ -4,7 +4,7 @@ use actix_cors::Cors;
 use std::sync::Mutex;
 use std::env;
 
-use crate::http_routes::list_songs;
+use crate::http_routes::{list_songs, delete_song_requests_service};
 use crate::http_routes::list_song_requests_service;
 use crate::http_routes::create_song_request_service;
 use crate::http_routes::delete_song_request_service;
@@ -18,7 +18,14 @@ mod websocket_server_actor;
 mod websocket_session_actor;
 
 pub struct AppState {
-    song_requests_by_user_id: HashMap<String, Vec<SongRequest>>,
+    song_requests_by_user_id: HashMap<String, Playlist>,
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Playlist {
+    song_requests_enabled: bool,
+    song_requests: Vec<SongRequest>,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
@@ -54,6 +61,7 @@ async fn main() -> std::io::Result<()> {
             .service(list_songs)
             .service(list_song_requests_service)
             .service(create_song_request_service)
+            .service(delete_song_requests_service)
             .service(delete_song_request_service)
             .service(websocket_service)
     })

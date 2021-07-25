@@ -4,7 +4,7 @@ use rand::{self, rngs::ThreadRng, Rng};
 use std::sync::{Mutex};
 
 use std::collections::{HashMap, HashSet};
-use crate::{AppState, SongRequest};
+use crate::{AppState, SongRequest, Playlist};
 use actix_web::web::Data;
 
 use serde::{Serialize};
@@ -200,6 +200,7 @@ pub struct BroadcastAppStateMessage {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct AppStateResponse {
+    song_requests_enabled: bool,
     song_requests: Vec<SongRequest>,
 }
 
@@ -209,11 +210,18 @@ impl Handler<BroadcastAppStateMessage> for WebsocketServerActor {
     fn handle(&mut self, broadcast_app_state_message: BroadcastAppStateMessage, _: &mut Context<Self>) {
         let app_state = self.app_state.lock().unwrap();
 
+        let default_playlist = Playlist {
+            song_requests_enabled: false,
+            song_requests: vec![]
+        };
+
+        let playlist = app_state.song_requests_by_user_id
+            .get(&broadcast_app_state_message.user_id)
+            .unwrap_or(&default_playlist);
+
         let serialized_app_state_response = serde_json::to_string(&AppStateResponse {
-            song_requests: app_state.song_requests_by_user_id
-                .get(&broadcast_app_state_message.user_id)
-                .unwrap_or(&vec![])
-                .clone()
+            song_requests_enabled: playlist.song_requests_enabled,
+            song_requests: playlist.song_requests.clone(),
         }).unwrap();
 
         log::debug!("Broadcasted app state: {:?}", serialized_app_state_response);
