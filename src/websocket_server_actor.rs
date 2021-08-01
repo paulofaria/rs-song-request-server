@@ -1,14 +1,14 @@
 use actix::prelude::*;
 use rand::{self, rngs::ThreadRng, Rng};
 
-use std::sync::{Mutex};
+use std::sync::Mutex;
 
-use std::collections::{HashMap, HashSet};
-use crate::{AppState, SongRequest, Playlist};
+use crate::{AppState, ArrangementType, Playlist, SongRequest};
 use actix_web::web::Data;
+use std::collections::{HashMap, HashSet};
 
-use serde::{Serialize};
-use crate::websocket_session_actor::{WebsocketReplyMessage};
+use crate::websocket_session_actor::WebsocketReplyMessage;
+use serde::Serialize;
 
 pub struct WebsocketServerActor {
     recipients_by_session_id: HashMap<usize, Recipient<WebsocketReplyMessage>>,
@@ -38,10 +38,14 @@ impl WebsocketServerActor {
         if let Some(session_ids) = self.session_ids_by_room_name.get(room_name) {
             for session_id in session_ids {
                 if *session_id != skip_session_id {
-                    if let Some(reply_message_recipient) = self.recipients_by_session_id.get(session_id) {
-                        reply_message_recipient.do_send(
-                            WebsocketReplyMessage { message: message.to_owned() }
-                        ).unwrap();
+                    if let Some(reply_message_recipient) =
+                        self.recipients_by_session_id.get(session_id)
+                    {
+                        reply_message_recipient
+                            .do_send(WebsocketReplyMessage {
+                                message: message.to_owned(),
+                            })
+                            .unwrap();
                     }
                 }
             }
@@ -67,7 +71,10 @@ impl Handler<ConnectMessage> for WebsocketServerActor {
 
         // Register session with random id.
         let session_id = self.random_number_generator.gen::<usize>();
-        self.recipients_by_session_id.insert(session_id, connect_message.websocket_session_actor_recipient);
+        self.recipients_by_session_id.insert(
+            session_id,
+            connect_message.websocket_session_actor_recipient,
+        );
 
         // Auto join room.
         self.session_ids_by_room_name
@@ -94,7 +101,11 @@ impl Handler<DisconnectMessage> for WebsocketServerActor {
         let mut rooms: Vec<String> = Vec::new();
 
         // Remove client session.
-        if self.recipients_by_session_id.remove(&disconnect_message.websocket_session_id).is_some() {
+        if self
+            .recipients_by_session_id
+            .remove(&disconnect_message.websocket_session_id)
+            .is_some()
+        {
             // Remove session from all rooms.
             for (room_name, sessions) in &mut self.session_ids_by_room_name {
                 if sessions.remove(&disconnect_message.websocket_session_id) {
@@ -107,7 +118,10 @@ impl Handler<DisconnectMessage> for WebsocketServerActor {
         //     self.send_message(&room, "Someone disconnected", 0);
         // }
 
-        log::debug!("Client with session id '{}' disconnected.", disconnect_message.websocket_session_id);
+        log::debug!(
+            "Client with session id '{}' disconnected.",
+            disconnect_message.websocket_session_id
+        );
     }
 }
 
@@ -126,7 +140,11 @@ impl Handler<ClientMessage> for WebsocketServerActor {
     type Result = ();
 
     fn handle(&mut self, client_message: ClientMessage, _: &mut Context<Self>) {
-        self.send_message(&client_message.room_name, client_message.message.as_str(), client_message.session_id);
+        self.send_message(
+            &client_message.room_name,
+            client_message.message.as_str(),
+            client_message.session_id,
+        );
     }
 }
 
@@ -167,7 +185,10 @@ impl Handler<JoinMessage> for WebsocketServerActor {
     type Result = ();
 
     fn handle(&mut self, join_message: JoinMessage, _: &mut Context<Self>) {
-        let JoinMessage { session_id, room_name } = join_message;
+        let JoinMessage {
+            session_id,
+            room_name,
+        } = join_message;
         let mut room_names = Vec::new();
 
         // Remove session from all rooms.
@@ -201,30 +222,43 @@ pub struct BroadcastAppStateMessage {
 #[serde(rename_all = "camelCase")]
 struct AppStateResponse {
     song_requests_enabled: bool,
+    song_arrangement: ArrangementType,
     song_requests: Vec<SongRequest>,
 }
 
 impl Handler<BroadcastAppStateMessage> for WebsocketServerActor {
     type Result = ();
 
-    fn handle(&mut self, broadcast_app_state_message: BroadcastAppStateMessage, _: &mut Context<Self>) {
+    fn handle(
+        &mut self,
+        broadcast_app_state_message: BroadcastAppStateMessage,
+        _: &mut Context<Self>,
+    ) {
         let app_state = self.app_state.lock().unwrap();
 
         let default_playlist = Playlist {
             song_requests_enabled: false,
-            song_requests: vec![]
+            song_arrangement: ArrangementType::All,
+            song_requests: vec![],
         };
 
-        let playlist = app_state.song_requests_by_user_id
+        let playlist = app_state
+            .song_requests_by_user_id
             .get(&broadcast_app_state_message.user_id)
             .unwrap_or(&default_playlist);
 
         let serialized_app_state_response = serde_json::to_string(&AppStateResponse {
             song_requests_enabled: playlist.song_requests_enabled,
+            song_arrangement: playlist.song_arrangement,
             song_requests: playlist.song_requests.clone(),
-        }).unwrap();
+        })
+        .unwrap();
 
         log::debug!("Broadcasted app state: {:?}", serialized_app_state_response);
-        self.send_message(&broadcast_app_state_message.user_id, serialized_app_state_response.as_str(), 0);
+        self.send_message(
+            &broadcast_app_state_message.user_id,
+            serialized_app_state_response.as_str(),
+            0,
+        );
     }
 }

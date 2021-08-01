@@ -1,21 +1,18 @@
 use actix::*;
+use actix_files::NamedFile;
 use actix_web::*;
 use actix_web_actors::ws;
-use actix_files::NamedFile;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::Instant;
 
-use serde::{Deserialize};
+use serde::Deserialize;
 
-use crate::websocket_session_actor::{WebsocketSessionActor};
-use crate::{AppState, websocket_server_actor, SongRequest, Playlist};
-
+use crate::websocket_session_actor::WebsocketSessionActor;
+use crate::{websocket_server_actor, AppState, ArrangementType, Playlist, SongRequest};
 
 #[get("/{user_id}/songs")]
-pub async fn list_songs(
-    user_id: web::Path<String>,
-) -> Result<NamedFile> {
+pub async fn list_songs(user_id: web::Path<String>) -> Result<NamedFile> {
     let filename = format!("{}.json", user_id.into_inner());
     let path: PathBuf = filename.parse().unwrap();
     Ok(NamedFile::open(path)?)
@@ -25,6 +22,7 @@ pub async fn list_songs(
 #[serde(rename_all = "kebab-case")]
 pub struct UpdatePlaylist {
     song_requests_enabled: bool,
+    song_arrangement: ArrangementType,
 }
 
 #[put("/{user_id}/songs")]
@@ -37,24 +35,27 @@ pub async fn update_playlist(
     let user_id = user_id.into_inner();
     let mut state = app_state.lock().unwrap();
 
-    state.song_requests_by_user_id
+    let playlist = state
+        .song_requests_by_user_id
         .entry(user_id.to_owned())
         .or_insert_with(|| Playlist {
             song_requests_enabled: false,
-            song_requests: vec![]
-        })
-        .song_requests_enabled = query.song_requests_enabled;
+            song_arrangement: ArrangementType::All,
+            song_requests: vec![],
+        });
+    playlist.song_requests_enabled = query.song_requests_enabled;
+    playlist.song_arrangement = query.song_arrangement;
 
-    websocket_server_actor_address.do_send(
-        websocket_server_actor::BroadcastAppStateMessage {
-            user_id: user_id.to_owned(),
-        }
-    );
+    websocket_server_actor_address.do_send(websocket_server_actor::BroadcastAppStateMessage {
+        user_id: user_id.to_owned(),
+    });
 
-    web::Json(state.song_requests_by_user_id
-        .get(&user_id)
-        .unwrap()
-        .clone()
+    web::Json(
+        state
+            .song_requests_by_user_id
+            .get(&user_id)
+            .unwrap()
+            .clone(),
     )
 }
 
@@ -66,13 +67,16 @@ pub async fn list_song_requests_service(
     let user_id = user_id.into_inner();
     let state = state.lock().unwrap();
 
-    web::Json(state.song_requests_by_user_id
-        .get(&user_id)
-        .unwrap_or(&Playlist {
-            song_requests_enabled: false,
-            song_requests: vec![]
-        })
-        .clone()
+    web::Json(
+        state
+            .song_requests_by_user_id
+            .get(&user_id)
+            .unwrap_or(&Playlist {
+                song_requests_enabled: false,
+                song_arrangement: ArrangementType::All,
+                song_requests: vec![],
+            })
+            .clone(),
     )
 }
 
@@ -87,33 +91,36 @@ pub async fn create_song_request_service(
     let song_request = song_request.into_inner();
     let mut state = app_state.lock().unwrap();
 
-    let position = state.song_requests_by_user_id
+    let position = state
+        .song_requests_by_user_id
         .get(&user_id)
-        .map_or(&vec![], |p| &p.song_requests )
+        .map_or(&vec![], |p| &p.song_requests)
         .iter()
         .position(|id| *id == song_request);
 
     if let None = position {
-        state.song_requests_by_user_id
+        state
+            .song_requests_by_user_id
             .entry(user_id.to_owned())
             .or_insert_with(|| Playlist {
                 song_requests_enabled: false,
-                song_requests: vec![]
+                song_arrangement: ArrangementType::All,
+                song_requests: vec![],
             })
             .song_requests
             .push(song_request);
 
-        websocket_server_actor_address.do_send(
-            websocket_server_actor::BroadcastAppStateMessage {
-                user_id: user_id.to_owned(),
-            }
-        );
+        websocket_server_actor_address.do_send(websocket_server_actor::BroadcastAppStateMessage {
+            user_id: user_id.to_owned(),
+        });
     }
 
-    web::Json(state.song_requests_by_user_id
-        .get(&user_id)
-        .unwrap()
-        .clone()
+    web::Json(
+        state
+            .song_requests_by_user_id
+            .get(&user_id)
+            .unwrap()
+            .clone(),
     )
 }
 
@@ -133,31 +140,34 @@ pub async fn delete_song_requests_service(
     let mut state = state.lock().unwrap();
     let position = query.index.unwrap_or(0);
 
-    let song_requests_size = state.song_requests_by_user_id
+    let song_requests_size = state
+        .song_requests_by_user_id
         .get(&user_id)
         .unwrap_or(&Playlist {
             song_requests_enabled: false,
-            song_requests: vec![]
+            song_arrangement: ArrangementType::All,
+            song_requests: vec![],
         })
         .song_requests
         .len();
 
     if position < song_requests_size {
-        state.song_requests_by_user_id
+        state
+            .song_requests_by_user_id
             .get_mut(&user_id)
             .map(|vec| vec.song_requests.remove(position));
 
-        websocket_server_actor_address.do_send(
-            websocket_server_actor::BroadcastAppStateMessage {
-                user_id: user_id.to_owned(),
-            }
-        );
+        websocket_server_actor_address.do_send(websocket_server_actor::BroadcastAppStateMessage {
+            user_id: user_id.to_owned(),
+        });
     }
 
-    web::Json(state.song_requests_by_user_id
-        .get(&user_id)
-        .unwrap()
-        .to_owned()
+    web::Json(
+        state
+            .song_requests_by_user_id
+            .get(&user_id)
+            .unwrap()
+            .to_owned(),
     )
 }
 
@@ -169,32 +179,35 @@ pub async fn delete_song_request_service(
 ) -> web::Json<Playlist> {
     let mut state = state.lock().unwrap();
 
-    let position = state.song_requests_by_user_id
+    let position = state
+        .song_requests_by_user_id
         .get(&user_id)
         .unwrap_or(&Playlist {
             song_requests_enabled: false,
-            song_requests: vec![]
+            song_arrangement: ArrangementType::All,
+            song_requests: vec![],
         })
         .song_requests
         .iter()
         .position(|id| *id.song_id == song_id);
 
     if let Some(position) = position {
-        state.song_requests_by_user_id
+        state
+            .song_requests_by_user_id
             .get_mut(&user_id)
             .map(|vec| vec.song_requests.remove(position));
 
-        websocket_server_actor_address.do_send(
-            websocket_server_actor::BroadcastAppStateMessage {
-                user_id: user_id.to_owned(),
-            }
-        );
+        websocket_server_actor_address.do_send(websocket_server_actor::BroadcastAppStateMessage {
+            user_id: user_id.to_owned(),
+        });
     }
 
-    web::Json(state.song_requests_by_user_id
-        .get(&user_id)
-        .unwrap()
-        .to_owned()
+    web::Json(
+        state
+            .song_requests_by_user_id
+            .get(&user_id)
+            .unwrap()
+            .to_owned(),
     )
 }
 

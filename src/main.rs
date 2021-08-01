@@ -1,14 +1,14 @@
 use actix::*;
-use actix_web::*;
 use actix_cors::Cors;
-use std::sync::Mutex;
+use actix_web::*;
 use std::env;
+use std::sync::Mutex;
 
-use crate::http_routes::{list_songs, delete_song_requests_service, update_playlist};
-use crate::http_routes::list_song_requests_service;
 use crate::http_routes::create_song_request_service;
 use crate::http_routes::delete_song_request_service;
+use crate::http_routes::list_song_requests_service;
 use crate::http_routes::websocket_service;
+use crate::http_routes::{delete_song_requests_service, list_songs, update_playlist};
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -25,7 +25,17 @@ pub struct AppState {
 #[serde(rename_all = "camelCase")]
 pub struct Playlist {
     song_requests_enabled: bool,
+    song_arrangement: ArrangementType,
     song_requests: Vec<SongRequest>,
+}
+
+#[derive(Deserialize, Serialize, Clone, Copy, PartialEq)]
+#[serde(rename_all = "PascalCase")]
+pub enum ArrangementType {
+    Guitar,
+    Bass,
+    Drums,
+    All,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq)]
@@ -49,7 +59,8 @@ async fn main() -> std::io::Result<()> {
         song_requests_by_user_id: HashMap::new(),
     }));
 
-    let websocket_server_actor_address = websocket_server_actor::WebsocketServerActor::new(app_state.clone()).start();
+    let websocket_server_actor_address =
+        websocket_server_actor::WebsocketServerActor::new(app_state.clone()).start();
 
     HttpServer::new(move || {
         let cors = Cors::permissive();
@@ -66,7 +77,7 @@ async fn main() -> std::io::Result<()> {
             .service(delete_song_request_service)
             .service(websocket_service)
     })
-        .bind(("0.0.0.0", port))?
-        .run()
-        .await
+    .bind(("0.0.0.0", port))?
+    .run()
+    .await
 }
