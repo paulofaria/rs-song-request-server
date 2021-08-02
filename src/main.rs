@@ -25,17 +25,18 @@ pub struct AppState {
 #[serde(rename_all = "camelCase")]
 pub struct Playlist {
     song_requests_enabled: bool,
-    song_arrangement: ArrangementType,
+    song_arrangements: Vec<ArrangementType>,
     song_requests: Vec<SongRequest>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Copy, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub enum ArrangementType {
-    Guitar,
+    Lead,
+    Rhythm,
     Bass,
+    Vocals,
     Drums,
-    All,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq)]

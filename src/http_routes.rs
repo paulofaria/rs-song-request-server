@@ -19,16 +19,16 @@ pub async fn list_songs(user_id: web::Path<String>) -> Result<NamedFile> {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub struct UpdatePlaylist {
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistUpdate {
     song_requests_enabled: bool,
-    song_arrangement: ArrangementType,
+    song_arrangements: Vec<ArrangementType>,
 }
 
 #[put("/{user_id}/songs")]
 pub async fn update_playlist(
     user_id: web::Path<String>,
-    query: web::Query<UpdatePlaylist>,
+    playlist_update: web::Json<PlaylistUpdate>,
     app_state: web::Data<Mutex<AppState>>,
     websocket_server_actor_address: web::Data<Addr<websocket_server_actor::WebsocketServerActor>>,
 ) -> web::Json<Playlist> {
@@ -40,11 +40,18 @@ pub async fn update_playlist(
         .entry(user_id.to_owned())
         .or_insert_with(|| Playlist {
             song_requests_enabled: false,
-            song_arrangement: ArrangementType::All,
+            song_arrangements: vec![
+                ArrangementType::Lead,
+                ArrangementType::Rhythm,
+                ArrangementType::Bass,
+                ArrangementType::Drums,
+                ArrangementType::Vocals,
+            ],
             song_requests: vec![],
         });
-    playlist.song_requests_enabled = query.song_requests_enabled;
-    playlist.song_arrangement = query.song_arrangement;
+
+    playlist.song_requests_enabled = playlist_update.song_requests_enabled;
+    playlist.song_arrangements = playlist_update.song_arrangements.to_owned();
 
     websocket_server_actor_address.do_send(websocket_server_actor::BroadcastAppStateMessage {
         user_id: user_id.to_owned(),
@@ -73,7 +80,13 @@ pub async fn list_song_requests_service(
             .get(&user_id)
             .unwrap_or(&Playlist {
                 song_requests_enabled: false,
-                song_arrangement: ArrangementType::All,
+                song_arrangements: vec![
+                    ArrangementType::Lead,
+                    ArrangementType::Rhythm,
+                    ArrangementType::Bass,
+                    ArrangementType::Drums,
+                    ArrangementType::Vocals,
+                ],
                 song_requests: vec![],
             })
             .clone(),
@@ -104,7 +117,13 @@ pub async fn create_song_request_service(
             .entry(user_id.to_owned())
             .or_insert_with(|| Playlist {
                 song_requests_enabled: false,
-                song_arrangement: ArrangementType::All,
+                song_arrangements: vec![
+                    ArrangementType::Lead,
+                    ArrangementType::Rhythm,
+                    ArrangementType::Bass,
+                    ArrangementType::Drums,
+                    ArrangementType::Vocals,
+                ],
                 song_requests: vec![],
             })
             .song_requests
@@ -145,7 +164,13 @@ pub async fn delete_song_requests_service(
         .get(&user_id)
         .unwrap_or(&Playlist {
             song_requests_enabled: false,
-            song_arrangement: ArrangementType::All,
+            song_arrangements: vec![
+                ArrangementType::Lead,
+                ArrangementType::Rhythm,
+                ArrangementType::Bass,
+                ArrangementType::Drums,
+                ArrangementType::Vocals,
+            ],
             song_requests: vec![],
         })
         .song_requests
@@ -184,7 +209,13 @@ pub async fn delete_song_request_service(
         .get(&user_id)
         .unwrap_or(&Playlist {
             song_requests_enabled: false,
-            song_arrangement: ArrangementType::All,
+            song_arrangements: vec![
+                ArrangementType::Lead,
+                ArrangementType::Rhythm,
+                ArrangementType::Bass,
+                ArrangementType::Drums,
+                ArrangementType::Vocals,
+            ],
             song_requests: vec![],
         })
         .song_requests

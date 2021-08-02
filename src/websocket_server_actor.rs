@@ -222,7 +222,7 @@ pub struct BroadcastAppStateMessage {
 #[serde(rename_all = "camelCase")]
 struct AppStateResponse {
     song_requests_enabled: bool,
-    song_arrangement: ArrangementType,
+    song_arrangements: Vec<ArrangementType>,
     song_requests: Vec<SongRequest>,
 }
 
@@ -238,7 +238,13 @@ impl Handler<BroadcastAppStateMessage> for WebsocketServerActor {
 
         let default_playlist = Playlist {
             song_requests_enabled: false,
-            song_arrangement: ArrangementType::All,
+            song_arrangements: vec![
+                ArrangementType::Lead,
+                ArrangementType::Rhythm,
+                ArrangementType::Bass,
+                ArrangementType::Drums,
+                ArrangementType::Vocals,
+            ],
             song_requests: vec![],
         };
 
@@ -249,8 +255,8 @@ impl Handler<BroadcastAppStateMessage> for WebsocketServerActor {
 
         let serialized_app_state_response = serde_json::to_string(&AppStateResponse {
             song_requests_enabled: playlist.song_requests_enabled,
-            song_arrangement: playlist.song_arrangement,
-            song_requests: playlist.song_requests.clone(),
+            song_arrangements: playlist.song_arrangements.to_owned(),
+            song_requests: playlist.song_requests.to_owned(),
         })
         .unwrap();
 
