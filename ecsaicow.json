@@ -9525,6 +9525,153 @@
         { "arrangementType": "Bass", "tuning": "EStandard" },
         { "arrangementType": "Lead", "tuning": "EStandard" }
       ]
+    },
+    {
+      "id": "20269005-5178-49bc-b90a-1a3568d88559",
+      "artist": "Anri",
+      "title": "Shyness Boy",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "a0534485-5468-4dfb-bb52-28c7d6132d7a",
+      "artist": "Chevelle",
+      "title": "Joyride (Omen)",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "DDropC" },
+        { "arrangementType": "Rhythm", "tuning": "DDropC" },
+        { "arrangementType": "Bass", "tuning": "DDropC" }
+      ]
+    },
+    {
+      "id": "0bd7ca30-c2c6-4ff1-997b-ae00f3ff5c54",
+      "artist": "Dead or Alive",
+      "title": "You Spin Me Round",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "ededb0fe-2bc0-40b9-a799-14b89c7ed035",
+      "artist": "Faith no More",
+      "title": "The Gentle Art of Making Enemies",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EStandard" },
+        { "arrangementType": "Bass", "tuning": "EStandard" }
+      ]
+    },
+    {
+      "id": "d5a72acc-35d1-4c24-854c-d70cf9f4e63d",
+      "artist": "Gorillaz",
+      "title": "Clint Eastwood",
+      "arrangements": [
+        { "arrangementType": "Bass", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EbStandard" }
+      ]
+    },
+    {
+      "id": "48ef60cf-c507-4942-afc0-d38d216e3a21",
+      "artist": "Limp Bizkit",
+      "title": "Take A Look Around",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "DbStandard" },
+        { "arrangementType": "Rhythm", "tuning": "DbStandard" },
+        { "arrangementType": "Bass", "tuning": "DbStandard" }
+      ]
+    },
+    {
+      "id": "5fa7c76a-db80-471a-b7aa-6df7c9d41538",
+      "artist": "Nirvana",
+      "title": "Dumb",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EbStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EbStandard" },
+        { "arrangementType": "Bass", "tuning": "EbStandard" }
+      ]
+    },
+    {
+      "id": "67e8745b-2354-4ef9-b36e-ffa6958dac84",
+      "artist": "Nirvana",
+      "title": "Tourette's",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EbStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EbStandard" },
+        { "arrangementType": "Bass", "tuning": "EbStandard" }
+      ]
+    },
+    {
+      "id": "4bde6533-a9ea-4c31-87b9-1c30aab25a0a",
+      "artist": "Pentakill",
+      "title": "Deathfire Grasp",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "CustomTuning" },
+        { "arrangementType": "Rhythm", "tuning": "CustomTuning" }
+      ]
+    },
+    {
+      "id": "7c4c1de5-69f4-4267-949e-ff8693d52ead",
+      "artist": "Pentakill",
+      "title": "Edge of Night",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EDropD" },
+        { "arrangementType": "Rhythm", "tuning": "EDropD" }
+      ]
+    },
+    {
+      "id": "3cc6fae8-4901-499c-8041-39c835e55edd",
+      "artist": "Pentakill",
+      "title": "Gathering Storm",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "CustomTuning" },
+        { "arrangementType": "Rhythm", "tuning": "CustomTuning" }
+      ]
+    },
+    {
+      "id": "10d110dc-ff4d-416e-bc24-f03fab87f20a",
+      "artist": "Pentakill",
+      "title": "Lightbringer",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "CustomTuning" }
+      ]
+    },
+    {
+      "id": "50d43599-5c6d-429e-b8b4-b7f52a39070f",
+      "artist": "Pentakill",
+      "title": "Mortal Reminder",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "CustomTuning" },
+        { "arrangementType": "Rhythm", "tuning": "CustomTuning" }
+      ]
+    },
+    {
+      "id": "0882039a-5ffa-471f-af54-2972493ff63c",
+      "artist": "Pentakill",
+      "title": "Tear of the Goddess",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "CustomTuning" }
+      ]
+    },
+    {
+      "id": "c994371c-afc6-4249-9c8e-78430f3d2e88",
+      "artist": "Santa Esmeralda",
+      "title": "Don't Let Me Be Misunderstood",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "5ccfaad5-92d1-46c5-bcb2-42a763290707",
+      "artist": "The Smiths",
+      "title": "What Difference Does It Make?",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "12802d54-749d-4c63-94ab-c1c238d2a288",
+      "artist": "The Strokes",
+      "title": "Razorblade",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EStandard" },
+        { "arrangementType": "Bass", "tuning": "EStandard" }
+      ]
     }
   ]
 }
