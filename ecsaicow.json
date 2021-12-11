@@ -9473,6 +9473,58 @@
         { "arrangementType": "Rhythm", "tuning": "DStandard" },
         { "arrangementType": "Lead", "tuning": "DStandard" }
       ]
+    },
+    {
+      "id": "90b2aaf3-6be5-4f6a-bcb7-576754786a7c",
+      "artist": "David Bowie",
+      "title": "Life On Mars",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "5ff1d655-b5ec-41f1-a9fd-305d7ef0d917",
+      "artist": "Kool and the Gang",
+      "title": "Get down on it",
+      "arrangements": [
+        { "arrangementType": "Rhythm", "tuning": "EStandard" },
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Bass", "tuning": "EStandard" }
+      ]
+    },
+    {
+      "id": "8a06de7f-ca14-4d58-b20d-43f3d0841685",
+      "artist": "Lionel Richie",
+      "title": "Hello",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "6ba7baae-5460-4e1e-b8df-80f2542e3f9a",
+      "artist": "Luli Lee",
+      "title": "Dive",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "a82a21c7-ae28-4992-88d8-f6524f134313",
+      "artist": "Red Hot Chili Peppers",
+      "title": "The Zephyr Song",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Bass", "tuning": "EStandard" }
+      ]
+    },
+    {
+      "id": "e169fabf-f16c-48e2-b855-bb3995b5f0a3",
+      "artist": "The Seatbelts",
+      "title": "What Planet Is This?",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "b64509ee-d3a8-4d34-9af6-600cc5a65d0e",
+      "artist": "Vulfpeck",
+      "title": "Dean Town",
+      "arrangements": [
+        { "arrangementType": "Bass", "tuning": "EStandard" },
+        { "arrangementType": "Lead", "tuning": "EStandard" }
+      ]
     }
   ]
 }
