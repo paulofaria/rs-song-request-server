@@ -9672,6 +9672,37 @@
         { "arrangementType": "Rhythm", "tuning": "EStandard" },
         { "arrangementType": "Bass", "tuning": "EStandard" }
       ]
+    },
+    {
+      "id": "318935e2-6c7f-455f-943d-ac816fb5491a",
+      "artist": "Bruno Mars, Anderson .Paak, Silk Sonic",
+      "title": "777",
+      "arrangements": [
+        { "arrangementType": "Bass", "tuning": "EStandard" },
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EStandard" }
+      ]
+    },
+    {
+      "id": "4620c74e-36ba-47ef-9daf-9e3cc2a62971",
+      "artist": "KAOMA",
+      "title": "LAMBADA",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "0c48696a-0a09-4d71-8964-9a9550db5ab5",
+      "artist": "Linkin Park",
+      "title": "Papercut",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EbDropDb" },
+        { "arrangementType": "Bass", "tuning": "EbDropDb" }
+      ]
+    },
+    {
+      "id": "b42ebf9d-048d-42b2-bc54-d233ad16af5c",
+      "artist": "Tatsuro Yamashita",
+      "title": "Christmas Eve",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
     }
   ]
 }
