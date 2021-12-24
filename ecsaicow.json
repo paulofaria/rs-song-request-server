@@ -9703,6 +9703,18 @@
       "artist": "Tatsuro Yamashita",
       "title": "Christmas Eve",
       "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "a5b40d1b-e615-4c6a-a4e8-18d498117c07",
+      "artist": "Boney M",
+      "title": "Sunny",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "2ad80aa2-3d33-4be3-a8b8-d632e947e8e7",
+      "artist": "Nana Mizuki",
+      "title": "WILD EYES",
+      "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
     }
   ]
 }
