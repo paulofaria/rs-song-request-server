@@ -9715,6 +9715,16 @@
       "artist": "Nana Mizuki",
       "title": "WILD EYES",
       "arrangements": [{ "arrangementType": "Bass", "tuning": "EStandard" }]
+    },
+    {
+      "id": "a80d4872-0860-4ead-829b-0f1a5124b05d",
+      "artist": "Devo",
+      "title": "Uncontrollable Urge",
+      "arrangements": [
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EStandard" },
+        { "arrangementType": "Bass", "tuning": "EStandard" }
+      ]
     }
   ]
 }
