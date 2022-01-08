@@ -9725,6 +9725,25 @@
         { "arrangementType": "Rhythm", "tuning": "EStandard" },
         { "arrangementType": "Bass", "tuning": "EStandard" }
       ]
+    },
+    {
+      "id": "ae2186eb-7907-4312-b9b6-6b19381b9acb",
+      "artist": "Pearl Jam",
+      "title": "Given to Fly",
+      "arrangements": [
+        { "arrangementType": "Bass", "tuning": "EDropD" },
+        { "arrangementType": "Lead", "tuning": "EStandard" },
+        { "arrangementType": "Rhythm", "tuning": "EStandard" }
+      ]
+    },
+    {
+      "id": "17b1da44-ccd2-4599-8097-9b79383779e5",
+      "artist": "Pearl Jam",
+      "title": "Wishlist",
+      "arrangements": [
+        { "arrangementType": "Rhythm", "tuning": "EStandard" },
+        { "arrangementType": "Bass", "tuning": "EStandard" }
+      ]
     }
   ]
 }
